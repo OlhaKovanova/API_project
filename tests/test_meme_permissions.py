@@ -1,20 +1,18 @@
 import requests
+
+from endpoints.auth import AuthAPI
 from endpoints.meme import MemeAPI
 from utils.token_storage import TokenStorage
-from utils.assertions import assert_status_forbidden_or_not_found
-
-
-def get_token_for_user(username):
-    TokenStorage.clear_token(username)
-    response = requests.post("http://167.172.172.115:52355/authorize", json={"name": username})
-    token = response.json().get("token")
-    TokenStorage.save_token(token, username)
-    return token
+from utils.assertions import assert_status_forbidden
 
 
 def test_user_cannot_delete_others_meme():
-    meme_api_user1 = MemeAPI(get_token_for_user("user1"))
-    meme_api_user2 = MemeAPI(get_token_for_user("user2"))
+    auth_api = AuthAPI()
+    token_user1 = auth_api.get_token("user1")
+    token_user2 = auth_api.get_token("user2")
+
+    meme_api_user1 = MemeAPI(token_user1)
+    meme_api_user2 = MemeAPI(token_user2)
 
     create_response = meme_api_user1.create(
         text="User1's meme",
@@ -25,7 +23,7 @@ def test_user_cannot_delete_others_meme():
     meme_id = create_response.json()["id"]
 
     delete_response = meme_api_user2.delete(meme_id)
-    assert_status_forbidden_or_not_found(delete_response)
+    assert_status_forbidden(delete_response)
 
     # Clean up
     meme_api_user1.delete(meme_id)

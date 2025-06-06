@@ -1,4 +1,5 @@
 from endpoints.base_endpoint import BaseEndpoint
+from utils.assertions import assert_status_bad_request
 
 
 class MemeAPI(BaseEndpoint):
@@ -29,3 +30,7 @@ class MemeAPI(BaseEndpoint):
 
     def delete(self, meme_id):
         return self._delete(f"/meme/{meme_id}")
+
+    def assert_status_bad_request(self, text, url, tags, info):
+        response = self.create(text, url, tags, info)
+        assert_status_bad_request(response)

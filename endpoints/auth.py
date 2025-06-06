@@ -19,3 +19,8 @@ class AuthAPI:
         token = response.json().get("token")
         TokenStorage.save_token(token, username)
         return token
+
+    @staticmethod
+    def is_token_alive(token):
+        response = requests.get(f"{AuthAPI.BASE_URL}/authorize/{token}")
+        return response.status_code == 200

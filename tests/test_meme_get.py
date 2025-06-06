@@ -1,5 +1,6 @@
 from endpoints.meme import MemeAPI
-from utils.assertions import assert_status_ok, assert_status_not_found, assert_status_unauthorized
+from utils.assertions import assert_status_ok, assert_status_not_found, assert_status_unauthorized, assert_is_list, \
+    assert_meme_equals
 
 
 def test_get_meme_by_id(meme_api, temp_meme):
@@ -9,11 +10,15 @@ def test_get_meme_by_id(meme_api, temp_meme):
     meme_data = get_response.json()
 
     # 2. Validate returned fields
-    assert meme_data["id"] == temp_meme
-    assert meme_data["text"] == "Temp meme"
-    assert meme_data["url"] == "http://example.com/delete.jpg"
-    assert "temp" in meme_data["tags"]
-    assert meme_data["info"]["author"] == "temp"
+    expected_data = {
+        "id": temp_meme,
+        "text": "Temp meme",
+        "url": "http://example.com/delete.jpg",
+        "tags": ["temp"],
+        "info": {"author": "temp"}
+    }
+    assert meme_data["id"] == expected_data["id"]
+    assert_meme_equals(expected_data, meme_data)
 
 
 def test_get_all_memes(meme_api):
@@ -24,7 +29,7 @@ def test_get_all_memes(meme_api):
     # 2. Response must contain a list in 'data'
     data = response.json()
     assert "data" in data
-    assert isinstance(data["data"], list)
+    assert_is_list(data["data"], field_name="data")
     assert len(data["data"]) >= 0
 
 
