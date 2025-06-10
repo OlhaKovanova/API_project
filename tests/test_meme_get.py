@@ -1,6 +1,7 @@
 from endpoints.meme import MemeAPI
-from utils.assertions import assert_status_ok, assert_status_not_found, assert_status_unauthorized, assert_is_list, \
-    assert_meme_equals
+from utils.assertions import assert_status_ok, assert_status_not_found, assert_status_unauthorized, \
+    assert_response_contains_data_list, \
+    assert_meme_equals_by_id, assert_response_contains_data_list
 
 
 def test_get_meme_by_id(meme_api, temp_meme):
@@ -17,20 +18,13 @@ def test_get_meme_by_id(meme_api, temp_meme):
         "tags": ["temp"],
         "info": {"author": "temp"}
     }
-    assert meme_data["id"] == expected_data["id"]
-    assert_meme_equals(expected_data, meme_data)
+    assert_meme_equals_by_id(expected_data, meme_data)
 
 
 def test_get_all_memes(meme_api):
-    # 1. Get all memes
     response = meme_api.get_all()
     assert_status_ok(response)
-
-    # 2. Response must contain a list in 'data'
-    data = response.json()
-    assert "data" in data
-    assert_is_list(data["data"], field_name="data")
-    assert len(data["data"]) >= 0
+    assert_response_contains_data_list(response)
 
 
 def test_get_all_memes_with_invalid_token():
@@ -39,3 +33,10 @@ def test_get_all_memes_with_invalid_token():
 
     response = meme_api.get_all()
     assert_status_unauthorized(response)
+
+
+def test_try_to_get_nonexistent_meme(meme_api):
+    non_existent_id = 999_999_999
+
+    get_response = meme_api.get_by_id(non_existent_id)
+    assert_status_not_found(get_response)

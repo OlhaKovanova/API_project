@@ -15,9 +15,6 @@ def test_delete_meme(meme_api, temp_meme):
 def test_delete_nonexistent_meme(meme_api):
     non_existent_id = 999_999_999
 
-    get_response = meme_api.get_by_id(non_existent_id)
-    assert_status_not_found(get_response)
-
     delete_response = meme_api.delete(non_existent_id)
     assert_status_not_found(delete_response)
 

@@ -1,24 +1,25 @@
 from endpoints.meme import MemeAPI
-from utils.assertions import assert_status_ok, assert_status_not_found, assert_status_unauthorized
+from utils.assertions import assert_status_ok, assert_status_not_found, assert_meme_equals_by_id
 
 
 def test_update_existing_meme(meme_api, temp_meme):
-    # 1. Update meme with new data
-    update_response = meme_api.update(
-        meme_id=temp_meme,
-        text="Updated meme text",
-        url="http://example.com/updated.jpg",
-        tags=["updated", "funny"],
-        info={"author": "updated_user"}
-    )
+
+    updated_payload = {
+        "meme_id": temp_meme,
+        "text": "Updated meme text",
+        "url": "http://example.com/updated.jpg",
+        "tags": ["updated", "funny"],
+        "info": {"author": "updated_user"}
+    }
+
+    update_response = meme_api.update(**updated_payload)
     assert_status_ok(update_response)
+
     updated_data = update_response.json()
 
-    # 2. Verify updates
-    assert updated_data["text"] == "Updated meme text"
-    assert updated_data["url"] == "http://example.com/updated.jpg"
-    assert "updated" in updated_data["tags"]
-    assert updated_data["info"]["author"] == "updated_user"
+    expected_data = updated_payload.copy()
+    expected_data["id"] = temp_meme
+    assert_meme_equals_by_id(expected_data, updated_data)
 
 
 def test_update_meme_not_found(meme_api):
